@@ -12,7 +12,13 @@ cf install-plugin ./bin/nozzle-plugin
 
 ## Usage
 
-```
+```bash
 cf nozzle --debug (optional)
 ```
 This only works if logged in as admin
+
+## Uninstall
+
+```bash
+cf uninstall FirehosePlugin
+```
