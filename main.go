@@ -1,15 +1,13 @@
 package main
 
 import (
-	"crypto/tls"
 	"os"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/cloudfoundry/cli/flags"
 	"github.com/cloudfoundry/cli/flags/flag"
 	"github.com/cloudfoundry/cli/plugin"
-	"github.com/cloudfoundry/noaa"
-	"github.com/cloudfoundry/sonde-go/events"
+	"github.com/jtuchscherer/nozzle-plugin/firehose"
 )
 
 type NozzlerCmd struct {
@@ -76,32 +74,6 @@ func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
 		c.ui.Failed(err.Error())
 	}
 
-	outputChan := make(chan *events.Envelope)
-	dopplerConnection := noaa.NewConsumer(dopplerEndpoint, &tls.Config{InsecureSkipVerify: true}, nil)
-	if debug {
-		dopplerConnection.SetDebugPrinter(ConsoleDebugPrinter{ui: c.ui})
-	}
-	go func() {
-		err = dopplerConnection.FirehoseWithoutReconnect("FirehosePlugin", authToken, outputChan)
-		if err != nil {
-			c.ui.Failed(err.Error())
-		}
-	}()
-	defer dopplerConnection.Close()
-
-	c.ui.Say("Starting the nozzle")
-	c.ui.Say("Hit Cmd+c to exit")
-	for msg := range outputChan {
-
-		c.ui.Say("%v \n", msg)
-	}
-}
-
-type ConsoleDebugPrinter struct {
-	ui terminal.UI
-}
-
-func (p ConsoleDebugPrinter) Print(title, dump string) {
-	p.ui.Say(title)
-	p.ui.Say(dump)
+	client := firehose.NewClient(authToken, dopplerEndpoint, debug, c.ui)
+	client.Start()
 }
