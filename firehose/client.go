@@ -34,14 +34,16 @@ func (c *Client) Start() {
 	go func() {
 		err := dopplerConnection.FirehoseWithoutReconnect("FirehosePlugin", c.authToken, outputChan)
 		if err != nil {
-			c.ui.Failed(err.Error())
+			c.ui.Warn(err.Error())
+			close(outputChan)
+			return
 		}
 	}()
 	defer dopplerConnection.Close()
 
 	c.ui.Say("Starting the nozzle")
 	c.ui.Say("Hit Cmd+c to exit")
-	c.ui.Say("Hit Cmd+c to exit")
+
 	for msg := range outputChan {
 		c.ui.Say("%v \n", msg)
 	}
