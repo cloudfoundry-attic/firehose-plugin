@@ -1,0 +1,11 @@
+language: go
+
+go:
+  - 1.4.2
+  - tip
+
+install:
+  - go get github.com/onsi/ginkgo/ginkgo
+  - go get github.com/onsi/gomega
+
+script: ./bin/test.sh
