@@ -1,5 +1,7 @@
 # nozzle-plugin
 
+[![Build Status](https://travis-ci.org/jtuchscherer/nozzle-plugin.svg?branch=master)](https://travis-ci.org/jtuchscherer/nozzle-plugin)
+
 ## Installation
 
 ```bash
