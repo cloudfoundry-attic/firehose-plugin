@@ -5,7 +5,8 @@ go:
   - tip
 
 install:
-  - go get ./...
+  - go get github.com/cloudfoundry/cli
+  - cd $GOPATH/src/github.com/cloudfoundry/cli && ./bin/generate-language-resources
   - go get github.com/onsi/ginkgo/ginkgo
   - go get github.com/onsi/gomega
 
