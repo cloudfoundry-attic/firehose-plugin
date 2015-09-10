@@ -31,6 +31,7 @@ func (c *Client) Start() {
 	if c.debug {
 		dopplerConnection.SetDebugPrinter(ConsoleDebugPrinter{ui: c.ui})
 	}
+
 	go func() {
 		err := dopplerConnection.FirehoseWithoutReconnect("FirehosePlugin", c.authToken, outputChan)
 		if err != nil {
@@ -39,6 +40,7 @@ func (c *Client) Start() {
 			return
 		}
 	}()
+
 	defer dopplerConnection.Close()
 
 	c.ui.Say("Starting the nozzle")
