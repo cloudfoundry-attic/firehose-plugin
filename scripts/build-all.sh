@@ -6,8 +6,8 @@ if [[ "$1" = "release" ]] ; then
 	TAG="$2"
 	: ${TAG:?"Usage: build_all.sh [release] [TAG]"}
 
-	git tag | grep $TAG > /dev/null 2>&1
-	if [ $? -eq 0 ] ; then
+
+	if git tag | grep $TAG > /dev/null 2>&1 ; then
 		echo "$TAG exists, remove it or increment"
 		exit 1
 	else
@@ -15,7 +15,7 @@ if [[ "$1" = "release" ]] ; then
 		MINOR=`echo $TAG | sed 's/^v//' | awk 'BEGIN {FS = "." } ; { printf $2;}'`
 		BUILD=`echo $TAG | sed 's/^v//' | awk 'BEGIN {FS = "." } ; { printf $3;}'`
 
-		`sed -i .bak -e "s/Major:.*/Major: $MAJOR,/" \
+		`sed -i "" -e "s/Major:.*/Major: $MAJOR,/" \
 			-e "s/Minor:.*/Minor: $MINOR,/" \
 			-e "s/Build:.*/Build: $BUILD,/" main.go`
 	fi
@@ -52,7 +52,7 @@ cat
 
 if [[ "$1" = "release" ]] ; then
 	git commit -am "Build version $TAG"
-	git tag $TAG
+	git tag -a $TAG -m "Nozzle Plugin v$TAG"
 	echo "Tagged release, 'git push --tags' to move it to github, and copy the output above"
 	echo "to the cli repo you plan to deploy in"
 fi
