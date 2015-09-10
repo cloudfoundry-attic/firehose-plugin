@@ -1,6 +1,8 @@
 package main_test
 
 import (
+	"strings"
+
 	"github.com/cloudfoundry/cli/plugin/fakes"
 	io_helpers "github.com/cloudfoundry/cli/testhelpers/io"
 	. "github.com/jtuchscherer/nozzle-plugin"
@@ -40,19 +42,21 @@ var _ = Describe("NozzlePlugin", func() {
 			outputChan := make(chan []string)
 			go func() {
 				output := io_helpers.CaptureOutput(func() {
-					nozzlerCmd.Run(fakeCliConnection, []string{"nozzle"})
+					nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "--debug"})
 				})
 				outputChan <- output
 			}()
 
 			var output []string
 			Eventually(outputChan, 2).Should(Receive(&output))
-
-			Expect(output[0]).To(Equal("Starting the nozzle"))
-			Expect(output[1]).To(Equal("Hit Cmd+c to exit"))
-			Expect(output[2]).To(ContainSubstring("websocket: close 1000"))
-			Expect(output[3]).To(ContainSubstring("Log Message"))
-		}, 20)
+			outputString := strings.Join(output, "|")
+			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
+			Expect(outputString).To(ContainSubstring("Hit Cmd+c to exit"))
+			Expect(outputString).To(ContainSubstring("websocket: close 1000"))
+			Expect(outputString).To(ContainSubstring("Log Message"))
+			Expect(outputString).To(ContainSubstring("WEBSOCKET REQUEST"))
+			Expect(outputString).To(ContainSubstring("WEBSOCKET RESPONSE"))
+		})
 	})
 
 })
