@@ -1,0 +1,21 @@
+- name: Firehose Plugin
+  description: This plugin allows you connect to the firehose (CF admins only)
+  version: __TAG__
+  created: 2015-09-09
+  updated: __TODAY__
+  company:
+  authors:
+  - name: Johannes Tuchscherer
+    homepage: http://github.com/jtuchscherer
+    contact: jtuchschererg@gmail.com
+  homepage: http://github.com/jtuchscherer/nozzle-plugin
+  binaries:
+  - platform: osx
+    url: http://github.com/jtuchscherer/nozzle-plugin/releases/download/_TAG_/nozzle-plugin-darwin
+    checksum: __osx-sha1__
+  - platform: win64
+    url: http://github.com/jtuchscherer/nozzle-plugin/releases/download/_TAG_/nozzle-plugin.exe
+    checksum: __win64-sha1__
+  - platform: linux64
+    url: http://github.com/jtuchscherer/nozzle-plugin/releases/download/_TAG_/nozzle-plugin-linux
+    checksum: __linux64-sha1__
