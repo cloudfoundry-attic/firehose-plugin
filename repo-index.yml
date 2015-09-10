@@ -1,5 +1,5 @@
 - name: Firehose Plugin
-  description: This plugin allows you connect to the firehose (CF admins only)
+  description: This plugin allows you to connect to the firehose (CF admins only)
   version: __TAG__
   created: 2015-09-09
   updated: __TODAY__
