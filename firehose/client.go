@@ -2,6 +2,7 @@ package firehose
 
 import (
 	"crypto/tls"
+	"strconv"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/cloudfoundry/noaa"
@@ -32,6 +33,18 @@ func (c *Client) Start() {
 		dopplerConnection.SetDebugPrinter(ConsoleDebugPrinter{ui: c.ui})
 	}
 
+	filter := c.ui.Ask(`What type of firehose messages do you want to see? Please enter one of the following choices:
+  hit 'enter' for all messages
+  2 for HttpStart
+  3 for HttpStop
+  4 for HttpStartStop
+  5 for LogMessage
+  6 for ValueMetric
+  7 for CounterEvent
+  8 for Error
+  9 for ContainerMetric
+`)
+
 	go func() {
 		err := dopplerConnection.FirehoseWithoutReconnect("FirehosePlugin", c.authToken, outputChan)
 		if err != nil {
@@ -46,8 +59,10 @@ func (c *Client) Start() {
 	c.ui.Say("Starting the nozzle")
 	c.ui.Say("Hit Cmd+c to exit")
 
-	for msg := range outputChan {
-		c.ui.Say("%v \n", msg)
+	for envelope := range outputChan {
+		if filter == "" || filter == strconv.Itoa((int)(envelope.GetEventType())) {
+			c.ui.Say("%v \n", envelope)
+		}
 	}
 }
 

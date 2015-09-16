@@ -50,13 +50,16 @@ var _ = Describe("NozzlePlugin", func() {
 			var output []string
 			Eventually(outputChan, 2).Should(Receive(&output))
 			outputString := strings.Join(output, "|")
+
+			Expect(outputString).To(ContainSubstring("What type of firehose messages do you want to see?"))
+
 			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
 			Expect(outputString).To(ContainSubstring("Hit Cmd+c to exit"))
 			Expect(outputString).To(ContainSubstring("websocket: close 1000"))
 			Expect(outputString).To(ContainSubstring("Log Message"))
 			Expect(outputString).To(ContainSubstring("WEBSOCKET REQUEST"))
 			Expect(outputString).To(ContainSubstring("WEBSOCKET RESPONSE"))
-		})
+		}, 3)
 	})
 
 })

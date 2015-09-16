@@ -2,6 +2,7 @@ package firehose_test
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/cloudfoundry/cli/cf/terminal/fakes"
@@ -12,19 +13,27 @@ import (
 )
 
 type fakeStdin struct {
-	Input string
+	Input []byte
+	done  bool
 }
 
-func (r fakeStdin) Read(b []byte) (n int, err error) {
-	b = append(b, []byte(r.Input)...)
+func (r *fakeStdin) Read(p []byte) (n int, err error) {
+	if r.done {
+		return 0, io.EOF
+	}
+	for i, b := range r.Input {
+		p[i] = b
+	}
+	r.done = true
 	return len(r.Input), nil
 }
 
 var _ = Describe("Firehose", func() {
 	var printer *fakes.FakePrinter
 	var ui terminal.UI
-	var stdin fakeStdin
+	var stdin *fakeStdin
 	var stdout string
+
 	BeforeEach(func() {
 		printer = new(fakes.FakePrinter)
 		stdout = ""
@@ -32,7 +41,7 @@ var _ = Describe("Firehose", func() {
 			stdout += fmt.Sprintf(format, a...)
 			return len(stdout), nil
 		}
-		stdin = fakeStdin{}
+		stdin = &fakeStdin{[]byte{'\n'}, false}
 		ui = terminal.NewUI(stdin, printer)
 	})
 
@@ -68,6 +77,21 @@ var _ = Describe("Firehose", func() {
 				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), false, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("This is a very special test message"))
+			})
+			Context("and the user filters by type", func() {
+				It("does not show log messages when user wants to see HttpStart", func() {
+					stdin.Input = []byte{'2', '\n'}
+					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), false, ui)
+					client.Start()
+					Expect(stdout).ToNot(ContainSubstring("This is a very special test message"))
+				})
+				It("shows log messages when the user wants to see log messages", func() {
+					stdin.Input = []byte{'5', '\n'}
+					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), false, ui)
+					client.Start()
+					Expect(stdout).To(ContainSubstring("This is a very special test message"))
+				})
+
 			})
 		})
 	})
