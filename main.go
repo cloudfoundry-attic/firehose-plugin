@@ -22,6 +22,11 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 			Minor: 2,
 			Build: 0,
 		},
+		MinCliVersion: plugin.VersionType{
+			Major: 6,
+			Minor: 12,
+			Build: 0,
+		},
 		Commands: []plugin.Command{
 			{
 				Name:     "nozzle",
