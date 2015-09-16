@@ -30,9 +30,12 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 		Commands: []plugin.Command{
 			{
 				Name:     "nozzle",
-				HelpText: "Command to connect to the firehose",
+				HelpText: "Command to print out messages from the firehose",
 				UsageDetails: plugin.Usage{
-					Usage: c.Usage(),
+					Usage: "cf nozzle",
+					Options: map[string]string{
+						"debug": "true to enable debugging",
+					},
 				},
 			},
 		},
@@ -47,10 +50,6 @@ func setupFlags() map[string]flags.FlagSet {
 
 func main() {
 	plugin.Start(new(NozzlerCmd))
-}
-
-func (c *NozzlerCmd) Usage() string {
-	return "cf nozzle --debug"
 }
 
 func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
