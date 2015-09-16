@@ -2,6 +2,12 @@
 
 set -e
 
+function cleanup {
+  rm -f main.exe
+  rm -f nozzle
+}
+trap cleanup EXIT
+
 SCRIPT_DIR=`dirname $0`
 cd ${SCRIPT_DIR}/..
 
