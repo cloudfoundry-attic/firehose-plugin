@@ -19,7 +19,7 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 		Name: "FirehosePlugin",
 		Version: plugin.VersionType{
 			Major: 0,
-			Minor: 3,
+			Minor: 4,
 			Build: 0,
 		},
 		MinCliVersion: plugin.VersionType{
