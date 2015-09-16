@@ -15,9 +15,9 @@ if [[ "$1" = "release" ]] ; then
 		MINOR=`echo $TAG | sed 's/^v//' | awk 'BEGIN {FS = "." } ; { printf $2;}'`
 		BUILD=`echo $TAG | sed 's/^v//' | awk 'BEGIN {FS = "." } ; { printf $3;}'`
 
-		`sed -i "" -e "s/Major:.*/Major: $MAJOR,/" \
-			-e "s/Minor:.*/Minor: $MINOR,/" \
-			-e "s/Build:.*/Build: $BUILD,/" main.go`
+		`sed -i "" -e "1,/Major:.*/s/Major:.*/Major: $MAJOR,/" \
+			-e "1,/Minor:.*/s/Minor:.*/Minor: $MINOR,/" \
+			-e "1,/Build:.*/s/Build:.*/Build: $BUILD,/" main.go`
 	fi
 fi
 
