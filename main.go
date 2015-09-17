@@ -7,7 +7,7 @@ import (
 	"github.com/cloudfoundry/cli/flags"
 	"github.com/cloudfoundry/cli/flags/flag"
 	"github.com/cloudfoundry/cli/plugin"
-	"github.com/jtuchscherer/nozzle-plugin/firehose"
+	"github.com/pivotal-cf-experimental/nozzle-plugin/firehose"
 )
 
 type NozzlerCmd struct {

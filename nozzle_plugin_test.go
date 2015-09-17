@@ -5,8 +5,8 @@ import (
 
 	"github.com/cloudfoundry/cli/plugin/fakes"
 	io_helpers "github.com/cloudfoundry/cli/testhelpers/io"
-	. "github.com/jtuchscherer/nozzle-plugin"
-	"github.com/jtuchscherer/nozzle-plugin/testhelpers"
+	. "github.com/pivotal-cf-experimental/nozzle-plugin"
+	"github.com/pivotal-cf-experimental/nozzle-plugin/testhelpers"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

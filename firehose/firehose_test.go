@@ -6,10 +6,10 @@ import (
 
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/cloudfoundry/cli/cf/terminal/fakes"
-	"github.com/jtuchscherer/nozzle-plugin/firehose"
-	"github.com/jtuchscherer/nozzle-plugin/testhelpers"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/pivotal-cf-experimental/nozzle-plugin/firehose"
+	"github.com/pivotal-cf-experimental/nozzle-plugin/testhelpers"
 )
 
 type fakeStdin struct {

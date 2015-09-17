@@ -1,13 +1,13 @@
 # nozzle-plugin
 
-[![Build Status](https://travis-ci.org/jtuchscherer/nozzle-plugin.svg?branch=master)](https://travis-ci.org/jtuchscherer/nozzle-plugin)
+[![Build Status](https://travis-ci.org/pivotal-cf-experimental/nozzle-plugin.svg?branch=master)](https://travis-ci.org/pivotal-cf-experimental/nozzle-plugin)
 
 ## Installation
 
 ```bash
 # In your go workspace:
 
-go get github.com/jtuchscherer/nozzle-plugin
+go get github.com/pivotal-cf-experimental/nozzle-plugin
 cf install-plugin ./bin/nozzle-plugin
 
 ```
