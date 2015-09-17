@@ -53,6 +53,6 @@ cat
 if [[ "$1" = "release" ]] ; then
 	git commit -am "Build version $TAG"
 	git tag -a $TAG -m "Nozzle Plugin v$TAG"
-	echo "Tagged release, 'git push --tags' to move it to github, and copy the output above"
-	echo "to the cli repo you plan to deploy in"
+	echo "Tagged release, 'git push --follow-tags' to push it to github, upload the binaries to github"
+	echo "and copy the output above to the cli repo you plan to deploy in"
 fi
