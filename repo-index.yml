@@ -8,14 +8,14 @@
   - name: Johannes Tuchscherer
     homepage: http://github.com/jtuchscherer
     contact: jtuchschererg@gmail.com
-  homepage: http://github.com/pivotal-cf-experimental/nozzle-plugin
+  homepage: http://github.com/cloudfoundry/firehose-plugin
   binaries:
   - platform: osx
-    url: http://github.com/pivotal-cf-experimental/nozzle-plugin/releases/download/__TAG__/nozzle-plugin-darwin
+    url: http://github.com/cloudfoundry/firehose-plugin/releases/download/__TAG__/nozzle-plugin-darwin
     checksum: __osx-sha1__
   - platform: win64
-    url: http://github.com/pivotal-cf-experimental/nozzle-plugin/releases/download/__TAG__/nozzle-plugin.exe
+    url: http://github.com/cloudfoundry/firehose-plugin/releases/download/__TAG__/nozzle-plugin.exe
     checksum: __win64-sha1__
   - platform: linux64
-    url: http://github.com/pivotal-cf-experimental/nozzle-plugin/releases/download/__TAG__/nozzle-plugin-linux
+    url: http://github.com/cloudfoundry/firehose-plugin/releases/download/__TAG__/nozzle-plugin-linux
     checksum: __linux64-sha1__
