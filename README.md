@@ -5,10 +5,8 @@
 ## Installation
 
 ```bash
-# In your go workspace:
-
-go get github.com/pivotal-cf-experimental/nozzle-plugin
-cf install-plugin ./bin/nozzle-plugin
+ $ cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org/
+ $ cf install-plugin "Firehose Plugin" -r CF-Community
 
 ```
 
