@@ -57,7 +57,7 @@ func (c *Client) Start() {
 	defer dopplerConnection.Close()
 
 	c.ui.Say("Starting the nozzle")
-	c.ui.Say("Hit Cmd+c to exit")
+	c.ui.Say("Hit Ctrl+c to exit")
 
 	for envelope := range outputChan {
 		if filter == "" || filter == strconv.Itoa((int)(envelope.GetEventType())) {
