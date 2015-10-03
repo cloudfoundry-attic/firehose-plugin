@@ -48,7 +48,8 @@ var _ = Describe("Firehose", func() {
 	Context("Start", func() {
 		Context("when the connection to doppler cannot be established", func() {
 			It("shows a meaningful error", func() {
-				client := firehose.NewClient("invalidToken", "badEndpoint", false, ui)
+				options := &firehose.ClientOptions{Debug: false}
+				client := firehose.NewClient("invalidToken", "badEndpoint", options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("Error dialing traffic controller server"))
 			})
@@ -62,32 +63,39 @@ var _ = Describe("Firehose", func() {
 				fakeFirehose.Start()
 			})
 			It("prints out debug information if demanded", func() {
-				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), true, ui)
+				options := &firehose.ClientOptions{Debug: true}
+				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("WEBSOCKET REQUEST"))
 				Expect(stdout).To(ContainSubstring("WEBSOCKET RESPONSE"))
 			})
 			It("shows no debug output if not requested", func() {
-				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), false, ui)
+				options := &firehose.ClientOptions{Debug: false}
+				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).ToNot(ContainSubstring("WEBSOCKET REQUEST"))
 				Expect(stdout).ToNot(ContainSubstring("WEBSOCKET RESPONSE"))
 			})
 			It("prints out log messages to the terminal", func() {
-				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), false, ui)
+				options := &firehose.ClientOptions{Debug: false}
+				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("This is a very special test message"))
 			})
 			Context("and the user filters by type", func() {
+				var options *firehose.ClientOptions
+				BeforeEach(func() {
+					options = &firehose.ClientOptions{Debug: false}
+				})
 				It("does not show log messages when user wants to see HttpStart", func() {
 					stdin.Input = []byte{'2', '\n'}
-					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), false, ui)
+					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).ToNot(ContainSubstring("This is a very special test message"))
 				})
 				It("shows log messages when the user wants to see log messages", func() {
 					stdin.Input = []byte{'5', '\n'}
-					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), false, ui)
+					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).To(ContainSubstring("This is a very special test message"))
 				})
