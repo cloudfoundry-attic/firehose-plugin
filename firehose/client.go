@@ -19,6 +19,7 @@ type Client struct {
 type ClientOptions struct {
 	Debug    bool
 	NoFilter bool
+	Filter   string
 }
 
 func NewClient(authToken, doppplerEndpoint string, options *ClientOptions, ui terminal.UI) *Client {
@@ -38,19 +39,12 @@ func (c *Client) Start() {
 		dopplerConnection.SetDebugPrinter(ConsoleDebugPrinter{ui: c.ui})
 	}
 
-	filter := ""
-	if !c.options.NoFilter {
-		filter = c.ui.Ask(`What type of firehose messages do you want to see? Please enter one of the following choices:
-	  hit 'enter' for all messages
-	  2 for HttpStart
-	  3 for HttpStop
-	  4 for HttpStartStop
-	  5 for LogMessage
-	  6 for ValueMetric
-	  7 for CounterEvent
-	  8 for Error
-	  9 for ContainerMetric
-	`)
+	envelopeType, ok := events.Envelope_EventType_value[c.options.Filter]
+	filter := strconv.Itoa(int(envelopeType))
+
+	if !c.options.NoFilter && !ok {
+		c.ui.Say("What type of firehose messages do you want to see?")
+		filter = c.promptFilterType()
 	}
 
 	go func() {
@@ -72,6 +66,23 @@ func (c *Client) Start() {
 			c.ui.Say("%v \n", envelope)
 		}
 	}
+}
+
+func (c *Client) promptFilterType() string {
+
+	filter := c.ui.Ask(`Please enter one of the following choices:
+	  hit 'enter' for all messages
+	  2 for HttpStart
+	  3 for HttpStop
+	  4 for HttpStartStop
+	  5 for LogMessage
+	  6 for ValueMetric
+	  7 for CounterEvent
+	  8 for Error
+	  9 for ContainerMetric
+	`)
+
+	return filter
 }
 
 type ConsoleDebugPrinter struct {

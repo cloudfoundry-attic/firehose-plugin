@@ -8,6 +8,7 @@ import (
 	. "github.com/cloudfoundry/firehose-plugin"
 	"github.com/cloudfoundry/firehose-plugin/testhelpers"
 
+	"github.com/cloudfoundry/sonde-go/events"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -24,7 +25,7 @@ var _ = Describe("NozzlePlugin", func() {
 
 		BeforeEach(func() {
 			fakeFirehose = testhelpers.NewFakeFirehose(ACCESS_TOKEN)
-			fakeFirehose.SendLog("Log Message")
+			fakeFirehose.SendEvent(events.Envelope_LogMessage, "Log Message")
 			fakeFirehose.Start()
 
 			fakeCliConnection = &fakes.FakeCliConnection{}
@@ -79,6 +80,47 @@ var _ = Describe("NozzlePlugin", func() {
 
 			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
 			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
+		}, 3)
+
+		It("prompts for filter input when bad filter flag is specifiedf", func(done Done) {
+			defer close(done)
+			outputChan := make(chan []string)
+			go func() {
+				output := io_helpers.CaptureOutput(func() {
+					nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "--filter", "IDontExist"})
+				})
+				outputChan <- output
+			}()
+
+			var output []string
+			Eventually(outputChan, 2).Should(Receive(&output))
+			outputString := strings.Join(output, "|")
+
+			Expect(outputString).To(ContainSubstring("What type of firehose messages do you want to see?"))
+
+			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
+			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
+		}, 3)
+
+		It("doesn't prompt for filter input when good filter flag is specifiedf", func(done Done) {
+			defer close(done)
+			outputChan := make(chan []string)
+			go func() {
+				output := io_helpers.CaptureOutput(func() {
+					nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "--filter", "LogMessage"})
+				})
+				outputChan <- output
+			}()
+
+			var output []string
+			Eventually(outputChan, 2).Should(Receive(&output))
+			outputString := strings.Join(output, "|")
+			Expect(outputString).ToNot(ContainSubstring("What type of firehose messages do you want to see?"))
+
+			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
+			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
+			Expect(outputString).To(ContainSubstring("logMessage:<message:\"Log Message\""))
+
 		}, 3)
 	})
 
