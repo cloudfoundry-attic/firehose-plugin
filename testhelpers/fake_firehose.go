@@ -13,6 +13,7 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/nu7hatch/gouuid"
+	"strings"
 )
 
 type FakeFirehose struct {
@@ -24,10 +25,11 @@ type FakeFirehose struct {
 	lastAuthorization string
 	requested         bool
 
-	events       []events.Envelope
-	closeMessage []byte
-	stayAlive    bool
-	wg           sync.WaitGroup
+	events         []events.Envelope
+	closeMessage   []byte
+	stayAlive      bool
+	subscriptionID string
+	wg             sync.WaitGroup
 }
 
 func NewFakeFirehose(validToken string) *FakeFirehose {
@@ -173,13 +175,17 @@ func (f *FakeFirehose) CloseAliveConnection() {
 	f.wg.Done()
 }
 
+func (f *FakeFirehose) SubscriptionID() string {
+	return f.subscriptionID
+}
+
 func (f *FakeFirehose) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
 	f.lastAuthorization = r.Header.Get("Authorization")
 	f.requested = true
-
+	f.subscriptionID = strings.Split(r.URL.String(), "/")[2]
 	if f.lastAuthorization != f.validToken {
 		log.Printf("Bad token passed to firehose: %s", f.lastAuthorization)
 		rw.WriteHeader(403)

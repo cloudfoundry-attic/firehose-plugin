@@ -114,6 +114,7 @@ var _ = Describe("Firehose", func() {
 				})
 			})
 			Context("in Non-Interactive mode", func() {
+
 				It("errors for un-recognized filter", func() {
 					options := &firehose.ClientOptions{Filter: "IDontExist"}
 					stdin.Input = []byte{'1', '\n'}
@@ -188,6 +189,20 @@ var _ = Describe("Firehose", func() {
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(lineCounter).To(Equal(11)) // 8 message plus three lines output from plugin setup
+				})
+
+				It("uses specified subscription id", func() {
+					options := &firehose.ClientOptions{SubscriptionID: "myFirehose"}
+					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+					client.Start()
+					Expect(fakeFirehose.SubscriptionID()).To(Equal("myFirehose"))
+				})
+
+				It("uses default subscription id if none specified", func() {
+					options := &firehose.ClientOptions{Filter: "LogMessage", Debug: true}
+					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+					client.Start()
+					Expect(fakeFirehose.SubscriptionID()).To(Equal("FirehosePlugin"))
 				})
 			})
 		})

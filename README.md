@@ -5,8 +5,8 @@
 ## Installation
 
 ```bash
- $ cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org/
- $ cf install-plugin "Firehose Plugin" -r CF-Community
+ cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org/
+ cf install-plugin "Firehose Plugin" -r CF-Community
 
 ```
 
@@ -18,12 +18,10 @@ cf nozzle --debug (optional)
 ```
 
 ### Without Interactive Prompt
-
 - Error message will be displayed for unrecognized filter type
-
 - This only works if logged in as admin
 
-```bash
+ ```bash
  # For all messages
  cf nozzle --no-filter
  
@@ -50,7 +48,14 @@ cf nozzle --debug (optional)
  
  # For Error
  cf nozzle --filter Error
-```
+ ```
+#### Subscription ID
+In order to distribute the firehose data evenly among multiple CLI sessions, the user must specify
+the same subscription ID to each of the client connections.
+
+ ```bash
+ cf nozzle --no-filter --subscription-id myFirehose
+ ```
 
 ## Uninstall
 

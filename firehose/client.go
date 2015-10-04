@@ -17,9 +17,10 @@ type Client struct {
 }
 
 type ClientOptions struct {
-	Debug    bool
-	NoFilter bool
-	Filter   string
+	Debug          bool
+	NoFilter       bool
+	Filter         string
+	SubscriptionID string
 }
 
 func NewClient(authToken, doppplerEndpoint string, options *ClientOptions, ui terminal.UI) *Client {
@@ -55,8 +56,13 @@ func (c *Client) Start() {
 		filter = c.promptFilterType()
 	}
 
+	subscriptionID := c.options.SubscriptionID
+	if len(subscriptionID) == 0 {
+		subscriptionID = "FirehosePlugin"
+	}
+
 	go func() {
-		err := dopplerConnection.FirehoseWithoutReconnect("FirehosePlugin", c.authToken, outputChan)
+		err := dopplerConnection.FirehoseWithoutReconnect(subscriptionID, c.authToken, outputChan)
 		if err != nil {
 			c.ui.Warn(err.Error())
 			close(outputChan)
