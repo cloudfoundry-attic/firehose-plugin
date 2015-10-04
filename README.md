@@ -15,6 +15,13 @@
 ```bash
 cf nozzle --debug (optional)
 ```
+
+To display all types of messages from the firehose
+
+```bash
+cf nozzle --no-filter
+```
+
 This only works if logged in as admin
 
 ## Uninstall

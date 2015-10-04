@@ -54,11 +54,31 @@ var _ = Describe("NozzlePlugin", func() {
 			Expect(outputString).To(ContainSubstring("What type of firehose messages do you want to see?"))
 
 			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
-			Expect(outputString).To(ContainSubstring("Hit Cmd+c to exit"))
+			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
 			Expect(outputString).To(ContainSubstring("websocket: close 1000"))
 			Expect(outputString).To(ContainSubstring("Log Message"))
 			Expect(outputString).To(ContainSubstring("WEBSOCKET REQUEST"))
 			Expect(outputString).To(ContainSubstring("WEBSOCKET RESPONSE"))
+		}, 3)
+
+		It("doesn't prompt for filter input when no-filter flag is specifiedf", func(done Done) {
+			defer close(done)
+			outputChan := make(chan []string)
+			go func() {
+				output := io_helpers.CaptureOutput(func() {
+					nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "--no-filter"})
+				})
+				outputChan <- output
+			}()
+
+			var output []string
+			Eventually(outputChan, 2).Should(Receive(&output))
+			outputString := strings.Join(output, "|")
+
+			Expect(outputString).ToNot(ContainSubstring("What type of firehose messages do you want to see?"))
+
+			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
+			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
 		}, 3)
 	})
 
