@@ -12,17 +12,43 @@
 
 ## Usage
 
+### With Interactive Prompt
 ```bash
 cf nozzle --debug (optional)
 ```
 
-To display all types of messages from the firehose
-
-```bash
-cf nozzle --no-filter
-```
-
-This only works if logged in as admin
+### Without Interactive Prompt
+- For invalid message types, it will prompt for input.
+- This only works if logged in as admin
+- To filter out messages based on type
+ ```bash
+ # For all messages
+ cf nozzle --no-filter
+ 
+ # For Log Messages
+ cf nozzle --filter LogMessage
+ 
+ # For HttpStart
+ cf nozzle --filter HttpStart
+ 
+ # For HttpStartStop
+ cf nozzle --filter HttpStartStop
+ 
+ # For HttpStop
+ cf nozzle --filter HttpStop
+ 
+ # For ValueMetric
+ cf nozzle --filter ValueMetric
+ 
+ # For CounterEvent
+ cf nozzle --filter CounterEvent
+ 
+ # For ContainerMetric
+ cf nozzle --filter ContainerMetric
+ 
+ # For Error
+ cf nozzle --filter Error
+ ```
 
 ## Uninstall
 
