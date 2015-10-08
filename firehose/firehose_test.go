@@ -34,12 +34,15 @@ var _ = Describe("Firehose", func() {
 	var ui terminal.UI
 	var stdin *fakeStdin
 	var stdout string
+	var lineCounter int
 
 	BeforeEach(func() {
+		lineCounter = 0
 		printer = new(fakes.FakePrinter)
 		stdout = ""
 		printer.PrintfStub = func(format string, a ...interface{}) (n int, err error) {
 			stdout += fmt.Sprintf(format, a...)
+			lineCounter++
 			return len(stdout), nil
 		}
 		stdin = &fakeStdin{[]byte{'\n'}, false}
@@ -111,14 +114,13 @@ var _ = Describe("Firehose", func() {
 				})
 			})
 			Context("in Non-Interactive mode", func() {
-				It("prompts for filter type for un-recognized filter", func() {
+				It("errors for un-recognized filter", func() {
 					options := &firehose.ClientOptions{Filter: "IDontExist"}
 					stdin.Input = []byte{'1', '\n'}
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 
-					Expect(stdout).To(ContainSubstring("What type of firehose messages do you want to see?"))
-					Expect(stdout).ToNot(ContainSubstring("This is a very special test message"))
+					Expect(stdout).To(ContainSubstring("Unable to recognize filter IDontExist"))
 				})
 
 				It("filters by LogMessage", func() {
@@ -181,6 +183,12 @@ var _ = Describe("Firehose", func() {
 					Expect(stdout).To(ContainSubstring("uri:\"http://startstop.example.com\""))
 				})
 
+				It("does not filter when NoFilter is true", func() {
+					options := &firehose.ClientOptions{NoFilter: true}
+					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+					client.Start()
+					Expect(lineCounter).To(Equal(11)) // 8 message plus three lines output from plugin setup
+				})
 			})
 		})
 	})

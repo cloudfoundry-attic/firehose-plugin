@@ -38,11 +38,19 @@ func (c *Client) Start() {
 	if c.options.Debug {
 		dopplerConnection.SetDebugPrinter(ConsoleDebugPrinter{ui: c.ui})
 	}
+	filter := ""
+	switch {
+	case c.options.NoFilter:
+		filter = ""
+	case c.options.Filter != "":
+		envelopeType, ok := events.Envelope_EventType_value[c.options.Filter]
+		if !ok {
+			c.ui.Warn("Unable to recognize filter %s", c.options.Filter)
+			return
+		}
+		filter = strconv.Itoa(int(envelopeType))
 
-	envelopeType, ok := events.Envelope_EventType_value[c.options.Filter]
-	filter := strconv.Itoa(int(envelopeType))
-
-	if !c.options.NoFilter && !ok {
+	default:
 		c.ui.Say("What type of firehose messages do you want to see?")
 		filter = c.promptFilterType()
 	}

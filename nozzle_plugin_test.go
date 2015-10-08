@@ -96,10 +96,7 @@ var _ = Describe("NozzlePlugin", func() {
 			Eventually(outputChan, 2).Should(Receive(&output))
 			outputString := strings.Join(output, "|")
 
-			Expect(outputString).To(ContainSubstring("What type of firehose messages do you want to see?"))
-
-			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
-			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
+			Expect(outputString).To(ContainSubstring("Unable to recognize filter IDontExist"))
 		}, 3)
 
 		It("doesn't prompt for filter input when good filter flag is specifiedf", func(done Done) {
