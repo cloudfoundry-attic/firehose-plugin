@@ -12,15 +12,21 @@ import (
 type Client struct {
 	dopplerEndpoint string
 	authToken       string
-	debug           bool
+	options         *ClientOptions
 	ui              terminal.UI
 }
 
-func NewClient(authToken, doppplerEndpoint string, debug bool, ui terminal.UI) *Client {
+type ClientOptions struct {
+	Debug    bool
+	NoFilter bool
+	Filter   string
+}
+
+func NewClient(authToken, doppplerEndpoint string, options *ClientOptions, ui terminal.UI) *Client {
 	return &Client{
 		dopplerEndpoint: doppplerEndpoint,
 		authToken:       authToken,
-		debug:           debug,
+		options:         options,
 		ui:              ui,
 	}
 
@@ -29,21 +35,25 @@ func NewClient(authToken, doppplerEndpoint string, debug bool, ui terminal.UI) *
 func (c *Client) Start() {
 	outputChan := make(chan *events.Envelope)
 	dopplerConnection := noaa.NewConsumer(c.dopplerEndpoint, &tls.Config{InsecureSkipVerify: true}, nil)
-	if c.debug {
+	if c.options.Debug {
 		dopplerConnection.SetDebugPrinter(ConsoleDebugPrinter{ui: c.ui})
 	}
+	filter := ""
+	switch {
+	case c.options.NoFilter:
+		filter = ""
+	case c.options.Filter != "":
+		envelopeType, ok := events.Envelope_EventType_value[c.options.Filter]
+		if !ok {
+			c.ui.Warn("Unable to recognize filter %s", c.options.Filter)
+			return
+		}
+		filter = strconv.Itoa(int(envelopeType))
 
-	filter := c.ui.Ask(`What type of firehose messages do you want to see? Please enter one of the following choices:
-  hit 'enter' for all messages
-  2 for HttpStart
-  3 for HttpStop
-  4 for HttpStartStop
-  5 for LogMessage
-  6 for ValueMetric
-  7 for CounterEvent
-  8 for Error
-  9 for ContainerMetric
-`)
+	default:
+		c.ui.Say("What type of firehose messages do you want to see?")
+		filter = c.promptFilterType()
+	}
 
 	go func() {
 		err := dopplerConnection.FirehoseWithoutReconnect("FirehosePlugin", c.authToken, outputChan)
@@ -57,13 +67,30 @@ func (c *Client) Start() {
 	defer dopplerConnection.Close()
 
 	c.ui.Say("Starting the nozzle")
-	c.ui.Say("Hit Cmd+c to exit")
+	c.ui.Say("Hit Ctrl+c to exit")
 
 	for envelope := range outputChan {
 		if filter == "" || filter == strconv.Itoa((int)(envelope.GetEventType())) {
 			c.ui.Say("%v \n", envelope)
 		}
 	}
+}
+
+func (c *Client) promptFilterType() string {
+
+	filter := c.ui.Ask(`Please enter one of the following choices:
+	  hit 'enter' for all messages
+	  2 for HttpStart
+	  3 for HttpStop
+	  4 for HttpStartStop
+	  5 for LogMessage
+	  6 for ValueMetric
+	  7 for CounterEvent
+	  8 for Error
+	  9 for ContainerMetric
+	`)
+
+	return filter
 }
 
 type ConsoleDebugPrinter struct {

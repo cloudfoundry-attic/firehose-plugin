@@ -45,6 +45,9 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 func setupFlags() map[string]flags.FlagSet {
 	fs := make(map[string]flags.FlagSet)
 	fs["debug"] = &cliFlags.BoolFlag{Name: "debug", Usage: "used for debugging"}
+	fs["no-filter"] = &cliFlags.BoolFlag{Name: "no-filter", Usage: "no firehose filter. Display all messages"}
+	fs["filter"] = &cliFlags.StringFlag{Name: "filter", Usage: "Specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop"}
+
 	return fs
 }
 
@@ -54,6 +57,9 @@ func main() {
 
 func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
 	var debug bool
+	var noFilter bool
+	var filter string
+
 	if args[0] != "nozzle" {
 		return
 	}
@@ -67,7 +73,12 @@ func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
 	if fc.IsSet("debug") {
 		debug = fc.Bool("debug")
 	}
-
+	if fc.IsSet("no-filter") {
+		noFilter = fc.Bool("no-filter")
+	}
+	if fc.IsSet("filter") {
+		filter = fc.String("filter")
+	}
 	dopplerEndpoint, err := cliConnection.DopplerEndpoint()
 	if err != nil {
 		c.ui.Failed(err.Error())
@@ -78,6 +89,12 @@ func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
 		c.ui.Failed(err.Error())
 	}
 
-	client := firehose.NewClient(authToken, dopplerEndpoint, debug, c.ui)
+	options := &firehose.ClientOptions{
+		Debug:    debug,
+		NoFilter: noFilter,
+		Filter:   filter,
+	}
+
+	client := firehose.NewClient(authToken, dopplerEndpoint, options, c.ui)
 	client.Start()
 }
