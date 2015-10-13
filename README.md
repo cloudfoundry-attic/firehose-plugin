@@ -18,10 +18,12 @@ cf nozzle --debug (optional)
 ```
 
 ### Without Interactive Prompt
-- For invalid message types, it will prompt for input.
+
+- Error message will be displayed for unrecognized filter type
+
 - This only works if logged in as admin
-- To filter out messages based on type
- ```bash
+
+```bash
  # For all messages
  cf nozzle --no-filter
  
@@ -48,10 +50,22 @@ cf nozzle --debug (optional)
  
  # For Error
  cf nozzle --filter Error
- ```
+```
 
 ## Uninstall
 
 ```bash
 cf uninstall FirehosePlugin
+```
+
+## Testing
+
+Run tests
+```bash
+./scripts/test.sh
+```
+
+If you want to install the plugin locally and test it manually
+```bash
+./scripts/install.sh
 ```
