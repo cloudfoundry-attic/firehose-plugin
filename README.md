@@ -1,6 +1,6 @@
 # nozzle-plugin
 
-[![Build Status](https://travis-ci.org/pivotal-cf-experimental/nozzle-plugin.svg?branch=master)](https://travis-ci.org/pivotal-cf-experimental/nozzle-plugin)
+[![Build Status](https://travis-ci.org/cloudfoundry/firehose-plugin.svg?branch=master)](https://travis-ci.org/cloudfoundry/firehose-plugin)
 
 ## Installation
 
