@@ -38,7 +38,7 @@ var _ = Describe("NozzlePlugin", func() {
 			fakeFirehose.Close()
 		})
 
-		It("works", func(done Done) {
+		It("displays debug logs when debug flag is passed", func(done Done) {
 			defer close(done)
 			outputChan := make(chan []string)
 			go func() {
@@ -82,7 +82,7 @@ var _ = Describe("NozzlePlugin", func() {
 			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
 		}, 3)
 
-		It("prompts for filter input when bad filter flag is specifiedf", func(done Done) {
+		It("return error message when bad filter flag is specifiedf", func(done Done) {
 			defer close(done)
 			outputChan := make(chan []string)
 			go func() {
@@ -119,6 +119,66 @@ var _ = Describe("NozzlePlugin", func() {
 			Expect(outputString).To(ContainSubstring("logMessage:<message:\"Log Message\""))
 
 		}, 3)
+
+		Context("short flag names", func() {
+			It("displays debug info", func(done Done) {
+				defer close(done)
+				outputChan := make(chan []string)
+				go func() {
+					output := io_helpers.CaptureOutput(func() {
+						nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "-d"})
+					})
+					outputChan <- output
+				}()
+
+				var output []string
+				Eventually(outputChan, 2).Should(Receive(&output))
+				outputString := strings.Join(output, "|")
+
+				Expect(outputString).To(ContainSubstring("What type of firehose messages do you want to see?"))
+
+				Expect(outputString).To(ContainSubstring("Starting the nozzle"))
+				Expect(outputString).To(ContainSubstring("WEBSOCKET REQUEST"))
+				Expect(outputString).To(ContainSubstring("GET /firehose/FirehosePlugin"))
+				Expect(outputString).To(ContainSubstring("WEBSOCKET RESPONSE"))
+			})
+
+			It("displays filtered logs", func(done Done) {
+				defer close(done)
+				outputChan := make(chan []string)
+				go func() {
+					output := io_helpers.CaptureOutput(func() {
+						nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "-f", "LogMessage"})
+					})
+					outputChan <- output
+				}()
+
+				var output []string
+				Eventually(outputChan, 2).Should(Receive(&output))
+				outputString := strings.Join(output, "|")
+
+				Expect(outputString).To(ContainSubstring("logMessage:<message:\"Log Message\""))
+			})
+
+			It("doesn't filter logs", func(done Done) {
+				defer close(done)
+				outputChan := make(chan []string)
+				go func() {
+					output := io_helpers.CaptureOutput(func() {
+						nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "-n"})
+					})
+					outputChan <- output
+				}()
+
+				var output []string
+				Eventually(outputChan, 2).Should(Receive(&output))
+				outputString := strings.Join(output, "|")
+
+				Expect(outputString).To(ContainSubstring("Starting the nozzle"))
+				Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
+			})
+
+		})
 	})
 
 })
