@@ -4,10 +4,9 @@ import (
 	"os"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
-	"github.com/cloudfoundry/cli/flags"
-	"github.com/cloudfoundry/cli/flags/flag"
 	"github.com/cloudfoundry/cli/plugin"
 	"github.com/cloudfoundry/firehose-plugin/firehose"
+	"github.com/simonleung8/flags"
 )
 
 type NozzlerCmd struct {
@@ -30,26 +29,19 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 		Commands: []plugin.Command{
 			{
 				Name:     "nozzle",
-				HelpText: "Command to print out messages from the firehose",
+				HelpText: "Displays messages from the firehose",
 				UsageDetails: plugin.Usage{
 					Usage: "cf nozzle",
 					Options: map[string]string{
-						"debug": "true to enable debugging",
+						"debug":           "-d, enable debugging",
+						"no-filter":       "-n, no firehose filter. Display all messages",
+						"filter":          "-f, specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop",
+						"subscription-id": "-s, specify subscription id for distributing firehose output between clients",
 					},
 				},
 			},
 		},
 	}
-}
-
-func setupFlags() map[string]flags.FlagSet {
-	fs := make(map[string]flags.FlagSet)
-	fs["debug"] = &cliFlags.BoolFlag{Name: "debug", Usage: "Used for debugging"}
-	fs["no-filter"] = &cliFlags.BoolFlag{Name: "no-filter", Usage: "no firehose filter. Display all messages"}
-	fs["filter"] = &cliFlags.StringFlag{Name: "filter", Usage: "Specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop"}
-	fs["subscription-id"] = &cliFlags.StringFlag{Name: "subscription-id", Usage: "Specify subscription id for splitting firehose output between clients"}
-
-	return fs
 }
 
 func main() {
@@ -85,8 +77,13 @@ func (c *NozzlerCmd) buildClientOptions(args []string) *firehose.ClientOptions {
 	var filter string
 	var subscriptionId string
 
-	fc := flags.NewFlagContext(setupFlags())
+	fc := flags.New()
+	fc.NewBoolFlag("debug", "d", "used for debugging")
+	fc.NewBoolFlag("no-filter", "n", "no firehose filter. Display all messages")
+	fc.NewStringFlag("filter", "f", "specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop")
+	fc.NewStringFlag("subscription-id", "s", "specify subscription id for distributing firehose output between clients")
 	err := fc.Parse(args[1:]...)
+
 	if err != nil {
 		c.ui.Failed(err.Error())
 	}

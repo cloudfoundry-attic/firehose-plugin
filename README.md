@@ -11,17 +11,35 @@
 ```
 
 ## Usage
+User must be logged in as admin
+
+### Options
+```
+NAME:
+   nozzle - Displays messages from the firehose
+
+USAGE:
+   cf nozzle
+
+OPTIONS:
+   -debug                 -d, enable debugging
+   -filter                -f, specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop
+   -no-filter             -n, no firehose filter. Display all messages
+   -subscription-id       -s, specify subscription id for distributing firehose output between clients
+```
 
 ### With Interactive Prompt
 ```bash
-cf nozzle --debug (optional)
+cf nozzle
 ```
 
 ### Without Interactive Prompt
-- Error message will be displayed for unrecognized filter type
-- This only works if logged in as admin
+Error message will be displayed for unrecognized filter type
 
  ```bash
+ # For debug
+ cf nozzle --debug
+ 
  # For all messages
  cf nozzle --no-filter
  
