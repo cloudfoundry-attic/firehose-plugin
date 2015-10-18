@@ -52,7 +52,7 @@ var _ = Describe("Firehose", func() {
 	Context("Start", func() {
 		Context("when the connection to doppler cannot be established", func() {
 			It("shows a meaningful error", func() {
-				options := &firehose.ClientOptions{Debug: false}
+				options := &firehose.ClientOptions{Debug: false, NoFilter: true}
 				client := firehose.NewClient("invalidToken", "badEndpoint", options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("Error dialing traffic controller server"))
@@ -74,7 +74,7 @@ var _ = Describe("Firehose", func() {
 				fakeFirehose.Start()
 			})
 			It("prints out debug information if demanded", func() {
-				options := &firehose.ClientOptions{Debug: true}
+				options := &firehose.ClientOptions{Debug: true, NoFilter: true}
 				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("WEBSOCKET REQUEST"))
@@ -88,11 +88,12 @@ var _ = Describe("Firehose", func() {
 				Expect(stdout).ToNot(ContainSubstring("WEBSOCKET RESPONSE"))
 			})
 			It("prints out log messages to the terminal", func() {
-				options := &firehose.ClientOptions{Debug: false}
+				options := &firehose.ClientOptions{Debug: false, NoFilter: true}
 				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("This is a very special test message"))
 			})
+
 			Context("in Interactive mode", func() {
 				Context("and the user filters by type", func() {
 					var options *firehose.ClientOptions
@@ -110,6 +111,20 @@ var _ = Describe("Firehose", func() {
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
 						Expect(stdout).To(ContainSubstring("This is a very special test message"))
+					})
+					It("shows error message when the user enters an invalid filter", func() {
+						stdin.Input = []byte{'b', 'l', 'a', '\n'}
+						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+						client.Start()
+
+						Expect(stdout).To(ContainSubstring("Invalid filter choice bla. Enter an index from 2-9"))
+					})
+					It("shows error message when the user selects invalid filter index", func() {
+						stdin.Input = []byte{'1', '\n'}
+						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+						client.Start()
+
+						Expect(stdout).To(ContainSubstring("Invalid filter choice 1"))
 					})
 				})
 			})
@@ -192,7 +207,7 @@ var _ = Describe("Firehose", func() {
 				})
 
 				It("uses specified subscription id", func() {
-					options := &firehose.ClientOptions{SubscriptionID: "myFirehose"}
+					options := &firehose.ClientOptions{SubscriptionID: "myFirehose", NoFilter: true}
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(fakeFirehose.SubscriptionID()).To(Equal("myFirehose"))

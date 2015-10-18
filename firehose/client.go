@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"strconv"
 
+	"fmt"
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/sonde-go/events"
@@ -34,6 +35,7 @@ func NewClient(authToken, doppplerEndpoint string, options *ClientOptions, ui te
 }
 
 func (c *Client) Start() {
+	var err error
 	outputChan := make(chan *events.Envelope)
 	dopplerConnection := noaa.NewConsumer(c.dopplerEndpoint, &tls.Config{InsecureSkipVerify: true}, nil)
 	if c.options.Debug {
@@ -53,7 +55,11 @@ func (c *Client) Start() {
 
 	default:
 		c.ui.Say("What type of firehose messages do you want to see?")
-		filter = c.promptFilterType()
+		filter, err = c.promptFilterType()
+		if err != nil {
+			c.ui.Warn(err.Error())
+			return
+		}
 	}
 
 	subscriptionID := c.options.SubscriptionID
@@ -82,7 +88,7 @@ func (c *Client) Start() {
 	}
 }
 
-func (c *Client) promptFilterType() string {
+func (c *Client) promptFilterType() (string, error) {
 
 	filter := c.ui.Ask(`Please enter one of the following choices:
 	  hit 'enter' for all messages
@@ -96,7 +102,17 @@ func (c *Client) promptFilterType() string {
 	  9 for ContainerMetric
 	`)
 
-	return filter
+	filterInt, err := strconv.Atoi(filter)
+	if err != nil {
+		return "", fmt.Errorf("Invalid filter choice %s. Enter an index from 2-9", filter)
+	}
+
+	_, ok := events.Envelope_EventType_name[int32(filterInt)]
+	if !ok {
+		return "", fmt.Errorf("Invalid filter choice %d", filterInt)
+	}
+
+	return filter, nil
 }
 
 type ConsoleDebugPrinter struct {
