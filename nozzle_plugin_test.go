@@ -43,7 +43,7 @@ var _ = Describe("NozzlePlugin", func() {
 			outputChan := make(chan []string)
 			go func() {
 				output := io_helpers.CaptureOutput(func() {
-					nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "--debug"})
+					nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "--debug", "--no-filter"})
 				})
 				outputChan <- output
 			}()
@@ -51,8 +51,6 @@ var _ = Describe("NozzlePlugin", func() {
 			var output []string
 			Eventually(outputChan, 2).Should(Receive(&output))
 			outputString := strings.Join(output, "|")
-
-			Expect(outputString).To(ContainSubstring("What type of firehose messages do you want to see?"))
 
 			Expect(outputString).To(ContainSubstring("Starting the nozzle"))
 			Expect(outputString).To(ContainSubstring("Hit Ctrl+c to exit"))
@@ -126,7 +124,7 @@ var _ = Describe("NozzlePlugin", func() {
 				outputChan := make(chan []string)
 				go func() {
 					output := io_helpers.CaptureOutput(func() {
-						nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "-d"})
+						nozzlerCmd.Run(fakeCliConnection, []string{"nozzle", "-d", "-n"})
 					})
 					outputChan <- output
 				}()
@@ -134,8 +132,6 @@ var _ = Describe("NozzlePlugin", func() {
 				var output []string
 				Eventually(outputChan, 2).Should(Receive(&output))
 				outputString := strings.Join(output, "|")
-
-				Expect(outputString).To(ContainSubstring("What type of firehose messages do you want to see?"))
 
 				Expect(outputString).To(ContainSubstring("Starting the nozzle"))
 				Expect(outputString).To(ContainSubstring("WEBSOCKET REQUEST"))
