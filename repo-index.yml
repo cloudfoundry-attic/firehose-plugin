@@ -8,6 +8,9 @@
   - name: Johannes Tuchscherer
     homepage: http://github.com/jtuchscherer
     contact: jtuchschererg@gmail.com
+  - name: Warren Fernandes
+    homepage: http://github.com/wfernandes
+    contact: warren.f.fernandes@gmail.com
   homepage: http://github.com/cloudfoundry/firehose-plugin
   binaries:
   - platform: osx
