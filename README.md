@@ -110,7 +110,7 @@ In order to create a new release, follow these steps
   ```
   vi repo-index.yml
   ```
-  to override the existing section about the firehose plugin
+  to override the existing section about the firehose plugin with the text previously copied in Step 2.
 1. Push the change to your fork
 1. Create a PR against the [original repo](https://github.com/cloudfoundry-incubator/cli-plugin-repo/compare)
 
