@@ -78,7 +78,7 @@ the same subscription ID to each of the client connections.
 ## Uninstall
 
 ```bash
-cf uninstall FirehosePlugin
+cf uninstall-plugin FirehosePlugin
 ```
 
 ## Testing
