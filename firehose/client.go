@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"fmt"
+
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/cloudfoundry/noaa"
 	"github.com/cloudfoundry/sonde-go/events"
@@ -101,6 +102,10 @@ func (c *Client) promptFilterType() (string, error) {
 	  8 for Error
 	  9 for ContainerMetric
 	`)
+
+	if filter == "" {
+		return "", nil
+	}
 
 	filterInt, err := strconv.Atoi(filter)
 	if err != nil {

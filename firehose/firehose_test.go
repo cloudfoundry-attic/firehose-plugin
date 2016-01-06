@@ -112,6 +112,19 @@ var _ = Describe("Firehose", func() {
 						client.Start()
 						Expect(stdout).To(ContainSubstring("This is a very special test message"))
 					})
+					It("shows all messages when user hits enter at filter prompt", func() {
+						stdin.Input = []byte{'\n'}
+						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+						client.Start()
+						Expect(stdout).To(ContainSubstring("This is a very special test message"))
+						Expect(stdout).To(ContainSubstring("eventType:ValueMetric"))
+						Expect(stdout).To(ContainSubstring("eventType:CounterEvent"))
+						Expect(stdout).To(ContainSubstring("eventType:ContainerMetric"))
+						Expect(stdout).To(ContainSubstring("eventType:Error"))
+						Expect(stdout).To(ContainSubstring("eventType:HttpStart"))
+						Expect(stdout).To(ContainSubstring("eventType:HttpStop"))
+						Expect(stdout).To(ContainSubstring("eventType:HttpStartStop"))
+					})
 					It("shows error message when the user enters an invalid filter", func() {
 						stdin.Input = []byte{'b', 'l', 'a', '\n'}
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
