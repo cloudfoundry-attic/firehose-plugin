@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
-	"github.com/cloudfoundry/noaa"
+	"github.com/cloudfoundry/noaa/consumer"
 	"github.com/cloudfoundry/sonde-go/events"
 )
 
@@ -37,8 +37,7 @@ func NewClient(authToken, doppplerEndpoint string, options *ClientOptions, ui te
 
 func (c *Client) Start() {
 	var err error
-	outputChan := make(chan *events.Envelope)
-	dopplerConnection := noaa.NewConsumer(c.dopplerEndpoint, &tls.Config{InsecureSkipVerify: true}, nil)
+	dopplerConnection := consumer.New(c.dopplerEndpoint, &tls.Config{InsecureSkipVerify: true}, nil)
 	if c.options.Debug {
 		dopplerConnection.SetDebugPrinter(ConsoleDebugPrinter{ui: c.ui})
 	}
@@ -68,11 +67,13 @@ func (c *Client) Start() {
 		subscriptionID = "FirehosePlugin"
 	}
 
+	output, errors := dopplerConnection.FirehoseWithoutReconnect(subscriptionID, c.authToken)
+
+	done := make(chan struct{})
 	go func() {
-		err := dopplerConnection.FirehoseWithoutReconnect(subscriptionID, c.authToken, outputChan)
-		if err != nil {
+		defer close(done)
+		for err := range errors {
 			c.ui.Warn(err.Error())
-			close(outputChan)
 			return
 		}
 	}()
@@ -82,11 +83,12 @@ func (c *Client) Start() {
 	c.ui.Say("Starting the nozzle")
 	c.ui.Say("Hit Ctrl+c to exit")
 
-	for envelope := range outputChan {
+	for envelope := range output {
 		if filter == "" || filter == strconv.Itoa((int)(envelope.GetEventType())) {
 			c.ui.Say("%v \n", envelope)
 		}
 	}
+	<-done
 }
 
 func (c *Client) promptFilterType() (string, error) {
