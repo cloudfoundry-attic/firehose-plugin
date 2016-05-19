@@ -3,7 +3,7 @@ package main_test
 import (
 	"strings"
 
-	"github.com/cloudfoundry/cli/plugin/fakes"
+	"github.com/cloudfoundry/cli/plugin/pluginfakes"
 	io_helpers "github.com/cloudfoundry/cli/testhelpers/io"
 	. "github.com/cloudfoundry/firehose-plugin"
 	"github.com/cloudfoundry/firehose-plugin/testhelpers"
@@ -19,7 +19,7 @@ const (
 
 var _ = Describe("NozzlePlugin", func() {
 	Describe(".Run", func() {
-		var fakeCliConnection *fakes.FakeCliConnection
+		var fakeCliConnection *pluginfakes.FakeCliConnection
 		var nozzlerCmd *NozzlerCmd
 		var fakeFirehose *testhelpers.FakeFirehose
 
@@ -28,7 +28,7 @@ var _ = Describe("NozzlePlugin", func() {
 			fakeFirehose.SendEvent(events.Envelope_LogMessage, "Log Message")
 			fakeFirehose.Start()
 
-			fakeCliConnection = &fakes.FakeCliConnection{}
+			fakeCliConnection = &pluginfakes.FakeCliConnection{}
 			fakeCliConnection.AccessTokenReturns(ACCESS_TOKEN, nil)
 			fakeCliConnection.DopplerEndpointReturns(fakeFirehose.URL(), nil)
 			nozzlerCmd = &NozzlerCmd{}

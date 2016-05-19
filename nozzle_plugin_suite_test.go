@@ -1,7 +1,7 @@
 package main_test
 
 import (
-	"github.com/cloudfoundry/cli/testhelpers/plugin_builder"
+	"github.com/cloudfoundry/cli/testhelpers/pluginbuilder"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -10,6 +10,6 @@ import (
 
 func TestNozzlePlugin(t *testing.T) {
 	RegisterFailHandler(Fail)
-	plugin_builder.BuildTestBinary(".", "main")
+	pluginbuilder.BuildTestBinary(".", "main")
 	RunSpecs(t, "NozzlePlugin Suite")
 }

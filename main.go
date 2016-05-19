@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
+	"github.com/cloudfoundry/cli/cf/trace"
 	"github.com/cloudfoundry/cli/plugin"
 	"github.com/cloudfoundry/firehose-plugin/firehose"
 	"github.com/simonleung8/flags"
@@ -49,11 +50,12 @@ func main() {
 }
 
 func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
-
 	if args[0] != "nozzle" {
 		return
 	}
-	c.ui = terminal.NewUI(os.Stdin, terminal.NewTeePrinter())
+
+	traceLogger := trace.NewLogger(os.Stdout, true, os.Getenv("CF_TRACE"), "")
+	c.ui = terminal.NewUI(os.Stdin, os.Stdout, terminal.NewTeePrinter(os.Stdout), traceLogger)
 
 	dopplerEndpoint, err := cliConnection.DopplerEndpoint()
 	if err != nil {
@@ -106,5 +108,4 @@ func (c *NozzlerCmd) buildClientOptions(args []string) *firehose.ClientOptions {
 		Filter:         filter,
 		SubscriptionID: subscriptionId,
 	}
-
 }

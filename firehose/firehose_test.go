@@ -1,12 +1,14 @@
 package firehose_test
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
-	"github.com/cloudfoundry/cli/cf/terminal/fakes"
+	"github.com/cloudfoundry/cli/cf/trace/tracefakes"
 	"github.com/cloudfoundry/firehose-plugin/firehose"
+	"github.com/cloudfoundry/firehose-plugin/firehose/fakes"
 	"github.com/cloudfoundry/firehose-plugin/testhelpers"
 	"github.com/cloudfoundry/sonde-go/events"
 	. "github.com/onsi/ginkgo"
@@ -30,15 +32,19 @@ func (r *fakeStdin) Read(p []byte) (n int, err error) {
 }
 
 var _ = Describe("Firehose", func() {
-	var printer *fakes.FakePrinter
-	var ui terminal.UI
-	var stdin *fakeStdin
-	var stdout string
-	var lineCounter int
+	var (
+		printer      *fakes.FakePrinter
+		tracePrinter *tracefakes.FakePrinter
+		ui           terminal.UI
+		stdin        *fakeStdin
+		stdout       string
+		lineCounter  int
+	)
 
 	BeforeEach(func() {
 		lineCounter = 0
 		printer = new(fakes.FakePrinter)
+		tracePrinter = new(tracefakes.FakePrinter)
 		stdout = ""
 		printer.PrintfStub = func(format string, a ...interface{}) (n int, err error) {
 			stdout += fmt.Sprintf(format, a...)
@@ -46,7 +52,9 @@ var _ = Describe("Firehose", func() {
 			return len(stdout), nil
 		}
 		stdin = &fakeStdin{[]byte{'\n'}, false}
-		ui = terminal.NewUI(stdin, printer)
+		var stdoutWriter bytes.Buffer
+
+		ui = terminal.NewUI(stdin, &stdoutWriter, printer, tracePrinter)
 	})
 
 	Context("Start", func() {
