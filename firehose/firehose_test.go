@@ -1,9 +1,8 @@
 package firehose_test
 
 import (
-	"bytes"
 	"fmt"
-	"io"
+	"strings"
 
 	"github.com/cloudfoundry/cli/cf/terminal"
 	"github.com/cloudfoundry/cli/cf/trace/tracefakes"
@@ -15,46 +14,28 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type fakeStdin struct {
-	Input []byte
-	done  bool
-}
-
-func (r *fakeStdin) Read(p []byte) (n int, err error) {
-	if r.done {
-		return 0, io.EOF
-	}
-	for i, b := range r.Input {
-		p[i] = b
-	}
-	r.done = true
-	return len(r.Input), nil
-}
-
 var _ = Describe("Firehose", func() {
 	var (
+		ui terminal.UI
+
 		printer      *fakes.FakePrinter
 		tracePrinter *tracefakes.FakePrinter
-		ui           terminal.UI
-		stdin        *fakeStdin
-		stdout       string
-		lineCounter  int
+
+		stdin  *syncedBuffer
+		stdout *syncedBuffer
 	)
 
 	BeforeEach(func() {
-		lineCounter = 0
-		printer = new(fakes.FakePrinter)
-		tracePrinter = new(tracefakes.FakePrinter)
-		stdout = ""
-		printer.PrintfStub = func(format string, a ...interface{}) (n int, err error) {
-			stdout += fmt.Sprintf(format, a...)
-			lineCounter++
-			return len(stdout), nil
-		}
-		stdin = &fakeStdin{[]byte{'\n'}, false}
-		var stdoutWriter bytes.Buffer
+		stdin = &syncedBuffer{}
+		stdout = &syncedBuffer{}
 
-		ui = terminal.NewUI(stdin, &stdoutWriter, printer, tracePrinter)
+		printer = new(fakes.FakePrinter)
+		printer.PrintfStub = func(format string, a ...interface{}) (n int, err error) {
+			return fmt.Fprintf(stdout, format, a...)
+		}
+		tracePrinter = new(tracefakes.FakePrinter)
+
+		ui = terminal.NewUI(stdin, stdout, printer, tracePrinter)
 	})
 
 	Context("Start", func() {
@@ -65,7 +46,6 @@ var _ = Describe("Firehose", func() {
 				client.Start()
 				Expect(stdout).To(ContainSubstring("Error dialing traffic controller server"))
 			})
-
 		})
 		Context("when the connection to doppler works", func() {
 			var fakeFirehose *testhelpers.FakeFirehose
@@ -109,19 +89,19 @@ var _ = Describe("Firehose", func() {
 						options = &firehose.ClientOptions{Debug: false, NoFilter: false}
 					})
 					It("does not show log messages when user wants to see HttpStart", func() {
-						stdin.Input = []byte{'2', '\n'}
+						stdin.Write([]byte{'2', '\n'})
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
 						Expect(stdout).ToNot(ContainSubstring("This is a very special test message"))
 					})
 					It("shows log messages when the user wants to see log messages", func() {
-						stdin.Input = []byte{'5', '\n'}
+						stdin.Write([]byte{'5', '\n'})
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
 						Expect(stdout).To(ContainSubstring("This is a very special test message"))
 					})
 					It("shows all messages when user hits enter at filter prompt", func() {
-						stdin.Input = []byte{'\n'}
+						stdin.Write([]byte{'\n'})
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
 						Expect(stdout).To(ContainSubstring("This is a very special test message"))
@@ -134,14 +114,14 @@ var _ = Describe("Firehose", func() {
 						Expect(stdout).To(ContainSubstring("eventType:HttpStartStop"))
 					})
 					It("shows error message when the user enters an invalid filter", func() {
-						stdin.Input = []byte{'b', 'l', 'a', '\n'}
+						stdin.Write([]byte{'b', 'l', 'a', '\n'})
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
 
 						Expect(stdout).To(ContainSubstring("Invalid filter choice bla. Enter an index from 2-9"))
 					})
 					It("shows error message when the user selects invalid filter index", func() {
-						stdin.Input = []byte{'1', '\n'}
+						stdin.Write([]byte{'1', '\n'})
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
 
@@ -153,7 +133,7 @@ var _ = Describe("Firehose", func() {
 
 				It("errors for un-recognized filter", func() {
 					options := &firehose.ClientOptions{Filter: "IDontExist"}
-					stdin.Input = []byte{'1', '\n'}
+					stdin.Write([]byte{'1', '\n'})
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 
@@ -224,7 +204,7 @@ var _ = Describe("Firehose", func() {
 					options := &firehose.ClientOptions{NoFilter: true}
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
-					Expect(lineCounter).To(Equal(11)) // 8 message plus three lines output from plugin setup
+					Expect(strings.Count(stdout.String(), "eventType:")).To(Equal(8))
 				})
 
 				It("uses specified subscription id", func() {
