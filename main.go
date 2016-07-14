@@ -19,12 +19,12 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 		Name: "FirehosePlugin",
 		Version: plugin.VersionType{
 			Major: 0,
-			Minor: 9,
+			Minor: 10,
 			Build: 0,
 		},
 		MinCliVersion: plugin.VersionType{
-			Major: 0,
-			Minor: 3,
+			Major: 6,
+			Minor: 17,
 			Build: 0,
 		},
 		Commands: []plugin.Command{
@@ -41,6 +41,18 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 					},
 				},
 			},
+			{
+				Name:     "app-nozzle",
+				HelpText: "Displays messages from the firehose for a given app",
+				UsageDetails: plugin.Usage{
+					Usage: "cf nozzle APP_NAME",
+					Options: map[string]string{
+						"debug":     "-d, enable debugging",
+						"no-filter": "-n, no firehose filter. Display all messages",
+						"filter":    "-f, specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop",
+					},
+				},
+			},
 		},
 	}
 }
@@ -50,12 +62,26 @@ func main() {
 }
 
 func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
-	if args[0] != "nozzle" {
-		return
-	}
+	var options *firehose.ClientOptions
 
 	traceLogger := trace.NewLogger(os.Stdout, true, os.Getenv("CF_TRACE"), "")
 	c.ui = terminal.NewUI(os.Stdin, os.Stdout, terminal.NewTeePrinter(os.Stdout), traceLogger)
+
+	switch args[0] {
+	case "nozzle":
+		options = c.buildClientOptions(args)
+	case "app-nozzle":
+		options = c.buildClientOptions(args)
+		appModel, err := cliConnection.GetApp(args[1])
+		if err != nil {
+			c.ui.Warn(err.Error())
+			return
+		}
+
+		options.AppGUID = appModel.Guid
+	default:
+		return
+	}
 
 	dopplerEndpoint, err := cliConnection.DopplerEndpoint()
 	if err != nil {
@@ -66,8 +92,6 @@ func (c *NozzlerCmd) Run(cliConnection plugin.CliConnection, args []string) {
 	if err != nil {
 		c.ui.Failed(err.Error())
 	}
-
-	options := c.buildClientOptions(args)
 
 	client := firehose.NewClient(authToken, dopplerEndpoint, options, c.ui)
 	client.Start()

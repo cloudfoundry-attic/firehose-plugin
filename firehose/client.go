@@ -19,6 +19,7 @@ type Client struct {
 }
 
 type ClientOptions struct {
+	AppGUID        string
 	Debug          bool
 	NoFilter       bool
 	Filter         string
@@ -62,12 +63,19 @@ func (c *Client) Start() {
 		}
 	}
 
-	subscriptionID := c.options.SubscriptionID
-	if len(subscriptionID) == 0 {
-		subscriptionID = "FirehosePlugin"
+	var errors <-chan error
+	var output <-chan *events.Envelope
+	if len(c.options.AppGUID) != 0 {
+		c.ui.Say("Starting the nozzle for app %s", c.options.AppGUID)
+		output, errors = dopplerConnection.StreamWithoutReconnect(c.options.AppGUID, c.authToken)
+	} else {
+		subscriptionID := c.options.SubscriptionID
+		if len(subscriptionID) == 0 {
+			subscriptionID = "FirehosePlugin"
+		}
+		c.ui.Say("Starting the nozzle")
+		output, errors = dopplerConnection.FirehoseWithoutReconnect(subscriptionID, c.authToken)
 	}
-
-	output, errors := dopplerConnection.FirehoseWithoutReconnect(subscriptionID, c.authToken)
 
 	done := make(chan struct{})
 	go func() {
@@ -80,7 +88,6 @@ func (c *Client) Start() {
 
 	defer dopplerConnection.Close()
 
-	c.ui.Say("Starting the nozzle")
 	c.ui.Say("Hit Ctrl+c to exit")
 
 	for envelope := range output {
