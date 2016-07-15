@@ -45,10 +45,10 @@ func (c *NozzlerCmd) GetMetadata() plugin.PluginMetadata {
 				Name:     "app-nozzle",
 				HelpText: "Displays messages from the firehose for a given app",
 				UsageDetails: plugin.Usage{
-					Usage: "cf nozzle APP_NAME",
+					Usage: "cf app-nozzle APP_NAME",
 					Options: map[string]string{
 						"debug":     "-d, enable debugging",
-						"no-filter": "-n, no firehose filter. Display all messages",
+						"no-filter": "-n, no filter. Display all messages",
 						"filter":    "-f, specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop",
 					},
 				},
