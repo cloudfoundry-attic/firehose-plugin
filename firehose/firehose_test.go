@@ -211,7 +211,7 @@ var _ = Describe("Firehose", func() {
 			})
 		})
 
-		Context("for admin connections", func() {
+		Context("for firehose connections", func() {
 			BeforeEach(func() {
 				options = &firehose.ClientOptions{Debug: false, NoFilter: true}
 			})
