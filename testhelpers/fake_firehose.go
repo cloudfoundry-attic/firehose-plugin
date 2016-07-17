@@ -9,16 +9,20 @@ import (
 	"time"
 
 	"encoding/binary"
+	"strings"
+
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/websocket"
 	"github.com/nu7hatch/gouuid"
-	"strings"
 )
 
 type FakeFirehose struct {
 	server *httptest.Server
 	lock   sync.Mutex
+
+	AppMode bool
+	AppName string
 
 	validToken string
 
@@ -34,6 +38,15 @@ type FakeFirehose struct {
 
 func NewFakeFirehose(validToken string) *FakeFirehose {
 	return &FakeFirehose{
+		validToken:   validToken,
+		closeMessage: websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
+	}
+}
+
+func NewFakeFirehoseInAppMode(validToken, appName string) *FakeFirehose {
+	return &FakeFirehose{
+		AppMode:      true,
+		AppName:      appName,
 		validToken:   validToken,
 		closeMessage: websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""),
 	}
@@ -182,6 +195,13 @@ func (f *FakeFirehose) SubscriptionID() string {
 func (f *FakeFirehose) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
+
+	if f.AppMode && r.URL.String() != fmt.Sprintf("/apps/%s/stream", f.AppName) {
+		log.Printf("App not found: %s", f.AppName)
+		rw.WriteHeader(404)
+		r.Body.Close()
+		return
+	}
 
 	f.lastAuthorization = r.Header.Get("Authorization")
 	f.requested = true
