@@ -31,7 +31,9 @@ OPTIONS:
    -subscription-id       -s, specify subscription id for distributing firehose output between clients
 ```
 
-All logs, metrics and events for a given app.
+All logs, metrics and events for a given app. This differs from `cf logs APP_NAME`
+because it provides other information like container metrics that are related
+to the app.
 
 ```
 NAME:
@@ -50,7 +52,7 @@ OPTIONS:
 
 ```bash
 cf nozzle
-cf app-nozzle myapp
+cf app-nozzle APP_NAME
 ```
 
 ### Without Interactive Prompt
@@ -60,43 +62,43 @@ Error message will be displayed for unrecognized filter type
 ```bash
 # For debug
 cf nozzle --debug
-cf app-nozzle myapp --debug
+cf app-nozzle APP_NAME --debug
 
 # For all messages
 cf nozzle --no-filter
-cf app-nozzle myapp --no-filter
+cf app-nozzle APP_NAME --no-filter
 
 # For Log Messages
 cf nozzle --filter LogMessage
-cf app-nozzle myapp --filter LogMessage
+cf app-nozzle APP_NAME --filter LogMessage
 
 # For HttpStart
 cf nozzle --filter HttpStart
-cf app-nozzle myapp --filter HttpStart
+cf app-nozzle APP_NAME --filter HttpStart
 
 # For HttpStartStop
 cf nozzle --filter HttpStartStop
-cf app-nozzle myapp --filter HttpStartStop
+cf app-nozzle APP_NAME --filter HttpStartStop
 
 # For HttpStop
 cf nozzle --filter HttpStop
-cf app-nozzle myapp --filter HttpStop
+cf app-nozzle APP_NAME --filter HttpStop
 
 # For ValueMetric
 cf nozzle --filter ValueMetric
-cf app-nozzle myapp --filter ValueMetric
+cf app-nozzle APP_NAME --filter ValueMetric
 
 # For CounterEvent
 cf nozzle --filter CounterEvent
-cf app-nozzle myapp --filter CounterEvent
+cf app-nozzle APP_NAME --filter CounterEvent
 
 # For ContainerMetric
 cf nozzle --filter ContainerMetric
-cf app-nozzle myapp --filter ContainerMetric
+cf app-nozzle APP_NAME --filter ContainerMetric
 
 # For Error
 cf nozzle --filter Error
-cf app-nozzle myapp --filter Error
+cf app-nozzle APP_NAME --filter Error
 ```
 
 #### Subscription ID
