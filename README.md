@@ -15,6 +15,8 @@ User must be logged in as admin
 
 ### Options
 
+The entire firehose for CF.
+
 ```
 NAME:
    nozzle - Displays messages from the firehose
@@ -29,10 +31,26 @@ OPTIONS:
    -subscription-id       -s, specify subscription id for distributing firehose output between clients
 ```
 
+All logs, metrics and events for a given app.
+
+```
+NAME:
+   app-nozzle - Displays messages from the firehose for a given app
+
+USAGE:
+   cf app-nozzle APP_NAME
+
+OPTIONS:
+   -debug           -d, enable debugging
+   -filter          -f, specify message filter such as LogMessage, ValueMetric, CounterEvent, HttpStartStop
+   -no-filter       -n, no filter. Display all messages
+```
+
 ### With Interactive Prompt
 
 ```bash
 cf nozzle
+cf app-nozzle myapp
 ```
 
 ### Without Interactive Prompt
@@ -42,33 +60,43 @@ Error message will be displayed for unrecognized filter type
 ```bash
 # For debug
 cf nozzle --debug
+cf app-nozzle myapp --debug
 
 # For all messages
 cf nozzle --no-filter
+cf app-nozzle myapp --no-filter
 
 # For Log Messages
 cf nozzle --filter LogMessage
+cf app-nozzle myapp --filter LogMessage
 
 # For HttpStart
 cf nozzle --filter HttpStart
+cf app-nozzle myapp --filter HttpStart
 
 # For HttpStartStop
 cf nozzle --filter HttpStartStop
+cf app-nozzle myapp --filter HttpStartStop
 
 # For HttpStop
 cf nozzle --filter HttpStop
+cf app-nozzle myapp --filter HttpStop
 
 # For ValueMetric
 cf nozzle --filter ValueMetric
+cf app-nozzle myapp --filter ValueMetric
 
 # For CounterEvent
 cf nozzle --filter CounterEvent
+cf app-nozzle myapp --filter CounterEvent
 
 # For ContainerMetric
 cf nozzle --filter ContainerMetric
+cf app-nozzle myapp --filter ContainerMetric
 
 # For Error
 cf nozzle --filter Error
+cf app-nozzle myapp --filter Error
 ```
 
 #### Subscription ID
