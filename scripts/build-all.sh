@@ -40,14 +40,14 @@ WIN64_SHA1=`cat $WIN_FILENAME | openssl sha1`
 mkdir -p bin/win64
 mv $WIN_FILENAME bin/win64
 
-TODAY=`date +'%Y-%m-%d'`
+NOW=`TZ=UC date +'%Y-%m-%dT%TZ'`
 
 cat repo-index.yml |
 sed "s/__osx-sha1__/$OSX_SHA1/" |
 sed "s/__win64-sha1__/$WIN64_SHA1/" |
 sed "s/__linux64-sha1__/$LINUX64_SHA1/" |
 sed "s/__TAG__/$TAG/" |
-sed "s/__TODAY__/$TODAY/" |
+sed "s/__TODAY__/$NOW/" |
 cat
 
 if [[ "$1" = "release" ]] ; then
