@@ -48,7 +48,7 @@ var _ = Describe("Firehose", func() {
 				It("shows a meaningful error", func() {
 					client := firehose.NewClient("invalidToken", "badEndpoint", options, ui)
 					client.Start()
-					Expect(stdout).To(ContainSubstring("Error dialing traffic controller server"))
+					Expect(stdout).To(ContainSubstring("Error dialing trafficcontroller server"))
 				})
 			})
 			Context("when the connection to doppler works", func() {
@@ -219,7 +219,7 @@ var _ = Describe("Firehose", func() {
 				It("shows a meaningful error", func() {
 					client := firehose.NewClient("invalidToken", "badEndpoint", options, ui)
 					client.Start()
-					Expect(stdout).To(ContainSubstring("Error dialing traffic controller server"))
+					Expect(stdout).To(ContainSubstring("Error dialing trafficcontroller server"))
 				})
 			})
 			Context("when the connection to doppler works", func() {
