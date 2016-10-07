@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	"github.com/cloudfoundry/cli/cf/terminal"
-	"github.com/cloudfoundry/cli/cf/trace"
-	"github.com/cloudfoundry/cli/plugin"
+	"code.cloudfoundry.org/cli/cf/terminal"
+	"code.cloudfoundry.org/cli/cf/trace"
+	"code.cloudfoundry.org/cli/plugin"
 	"github.com/cloudfoundry/firehose-plugin/firehose"
 	"github.com/simonleung8/flags"
 )

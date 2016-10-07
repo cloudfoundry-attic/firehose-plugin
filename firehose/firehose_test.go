@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cloudfoundry/cli/cf/terminal"
-	"github.com/cloudfoundry/cli/cf/trace/tracefakes"
+	"code.cloudfoundry.org/cli/cf/terminal"
+	"code.cloudfoundry.org/cli/cf/trace/tracefakes"
 	"github.com/cloudfoundry/firehose-plugin/firehose"
 	"github.com/cloudfoundry/firehose-plugin/firehose/fakes"
 	"github.com/cloudfoundry/firehose-plugin/testhelpers"
