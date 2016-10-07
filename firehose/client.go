@@ -3,6 +3,7 @@ package firehose
 import (
 	"crypto/tls"
 	"strconv"
+	"time"
 
 	"fmt"
 
@@ -71,7 +72,7 @@ func (c *Client) Start() {
 	} else {
 		subscriptionID := c.options.SubscriptionID
 		if len(subscriptionID) == 0 {
-			subscriptionID = "FirehosePlugin"
+			subscriptionID = generateSubscriptionID()
 		}
 		c.ui.Say("Starting the nozzle")
 		output, errors = dopplerConnection.FirehoseWithoutReconnect(subscriptionID, c.authToken)
@@ -134,4 +135,8 @@ type ConsoleDebugPrinter struct {
 func (p ConsoleDebugPrinter) Print(title, dump string) {
 	p.ui.Say(title)
 	p.ui.Say(dump)
+}
+
+func generateSubscriptionID() string {
+	return fmt.Sprintf("FirehosePlugin-%d", time.Now().UnixNano())
 }

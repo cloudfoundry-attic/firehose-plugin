@@ -193,11 +193,22 @@ var _ = Describe("Firehose", func() {
 					Expect(fakeFirehose.SubscriptionID()).To(Equal("myFirehose"))
 				})
 
-				It("uses default subscription id if none specified", func() {
+				It("uses generates subscription id if none specified", func() {
 					options = &firehose.ClientOptions{Filter: "LogMessage", Debug: true}
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
-					Expect(fakeFirehose.SubscriptionID()).To(Equal("FirehosePlugin"))
+					Expect(fakeFirehose.SubscriptionID()).To(ContainSubstring("FirehosePlugin"))
+				})
+
+				It("generates a different subscription id for each client", func() {
+					options = &firehose.ClientOptions{Filter: "LogMessage", Debug: true}
+					client1 := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+					client1.Start()
+					firstSubscriptionID := fakeFirehose.SubscriptionID()
+					client2 := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
+					client2.Start()
+					secondSubscriptionID := fakeFirehose.SubscriptionID()
+					Expect(firstSubscriptionID).ToNot(Equal(secondSubscriptionID))
 				})
 			})
 		})
