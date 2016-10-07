@@ -14,7 +14,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Firehose", func() {
+var _ = Describe("App Firehose", func() {
 	var (
 		ui terminal.UI
 
@@ -37,7 +37,7 @@ var _ = Describe("Firehose", func() {
 		tracePrinter = new(tracefakes.FakePrinter)
 
 		ui = terminal.NewUI(stdin, stdout, printer, tracePrinter)
-		options = &firehose.ClientOptions{Debug: false, NoFilter: true}
+		options = &firehose.ClientOptions{AppGUID: "spring-music", Debug: false, NoFilter: true}
 	})
 
 	Describe("Start", func() {
@@ -51,7 +51,7 @@ var _ = Describe("Firehose", func() {
 		Context("when the connection to doppler works", func() {
 			var fakeFirehose *testhelpers.FakeFirehose
 			BeforeEach(func() {
-				fakeFirehose = testhelpers.NewFakeFirehose("ACCESS_TOKEN")
+				fakeFirehose = testhelpers.NewFakeFirehoseInAppMode("ACCESS_TOKEN", "spring-music")
 				fakeFirehose.SendEvent(events.Envelope_LogMessage, "This is a very special test message")
 				fakeFirehose.SendEvent(events.Envelope_ValueMetric, "valuemetric")
 				fakeFirehose.SendEvent(events.Envelope_CounterEvent, "counterevent")
@@ -61,30 +61,28 @@ var _ = Describe("Firehose", func() {
 				fakeFirehose.Start()
 			})
 			It("prints out debug information if demanded", func() {
-				options = &firehose.ClientOptions{Debug: true}
+				options.Debug = true
 				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("WEBSOCKET REQUEST"))
 				Expect(stdout).To(ContainSubstring("WEBSOCKET RESPONSE"))
 			})
 			It("shows no debug output if not requested", func() {
-				options = &firehose.ClientOptions{Debug: false}
+				options.Debug = false
 				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).ToNot(ContainSubstring("WEBSOCKET REQUEST"))
 				Expect(stdout).ToNot(ContainSubstring("WEBSOCKET RESPONSE"))
 			})
 			It("prints out log messages to the terminal", func() {
-				options = &firehose.ClientOptions{Debug: false, NoFilter: true}
 				client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 				client.Start()
 				Expect(stdout).To(ContainSubstring("This is a very special test message"))
 			})
-
 			Context("in Interactive mode", func() {
 				Context("and the user filters by type", func() {
 					BeforeEach(func() {
-						options = &firehose.ClientOptions{Debug: false, NoFilter: false}
+						options.NoFilter = false
 					})
 					It("does not show log messages when user wants to see ValueMetric", func() {
 						stdin.Write([]byte{'6', '\n'})
@@ -127,7 +125,8 @@ var _ = Describe("Firehose", func() {
 			})
 			Context("in Non-Interactive mode", func() {
 				It("errors for un-recognized filter", func() {
-					options = &firehose.ClientOptions{Filter: "IDontExist"}
+					options.NoFilter = false
+					options.Filter = "IDontExist"
 					stdin.Write([]byte{'1', '\n'})
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
@@ -136,42 +135,42 @@ var _ = Describe("Firehose", func() {
 				})
 
 				It("filters by LogMessage", func() {
-					options = &firehose.ClientOptions{Filter: "LogMessage"}
+					options.Filter = "LogMessage"
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).To(ContainSubstring("This is a very special test message"))
 				})
 
 				It("filters by ValueMetric", func() {
-					options = &firehose.ClientOptions{Filter: "ValueMetric"}
+					options.Filter = "ValueMetric"
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).To(ContainSubstring("valueMetric:<name:\"valuemetric\" value:42 unit:\"unit\""))
 				})
 
 				It("filters by CounterEvent", func() {
-					options := &firehose.ClientOptions{Filter: "CounterEvent"}
+					options.Filter = "CounterEvent"
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).To(ContainSubstring("counterEvent:<name:\"counterevent\" delta:42"))
 				})
 
 				It("filters by ContainerMetric", func() {
-					options = &firehose.ClientOptions{Filter: "ContainerMetric"}
+					options.Filter = "ContainerMetric"
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).To(ContainSubstring("containerMetric:<applicationId:\"containermetric\" instanceIndex:1 cpuPercentage:1 memoryBytes:1 diskBytes:1"))
 				})
 
 				It("filters by Error", func() {
-					options = &firehose.ClientOptions{Filter: "Error"}
+					options.Filter = "Error"
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).To(ContainSubstring("error:<source:\"source\" code:404 message:\"this is an error\""))
 				})
 
 				It("filters by HttpStartStop", func() {
-					options = &firehose.ClientOptions{Filter: "HttpStartStop"}
+					options.Filter = "HttpStartStop"
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(stdout).To(ContainSubstring("httpStartStop:<startTimestamp:1234 stopTimestamp:5555 "))
@@ -180,26 +179,13 @@ var _ = Describe("Firehose", func() {
 				})
 
 				It("does not filter when NoFilter is true", func() {
-					options = &firehose.ClientOptions{NoFilter: true}
+					options.NoFilter = true
 					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 					client.Start()
 					Expect(strings.Count(stdout.String(), "eventType:")).To(Equal(6))
 				})
-
-				It("uses specified subscription id", func() {
-					options = &firehose.ClientOptions{SubscriptionID: "myFirehose", NoFilter: true}
-					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
-					client.Start()
-					Expect(fakeFirehose.SubscriptionID()).To(Equal("myFirehose"))
-				})
-
-				It("uses default subscription id if none specified", func() {
-					options = &firehose.ClientOptions{Filter: "LogMessage", Debug: true}
-					client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
-					client.Start()
-					Expect(fakeFirehose.SubscriptionID()).To(Equal("FirehosePlugin"))
-				})
 			})
 		})
+
 	})
 })
