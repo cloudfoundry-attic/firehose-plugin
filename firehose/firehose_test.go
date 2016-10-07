@@ -60,8 +60,6 @@ var _ = Describe("Firehose", func() {
 					fakeFirehose.SendEvent(events.Envelope_CounterEvent, "counterevent")
 					fakeFirehose.SendEvent(events.Envelope_ContainerMetric, "containermetric")
 					fakeFirehose.SendEvent(events.Envelope_Error, "this is an error")
-					fakeFirehose.SendEvent(events.Envelope_HttpStart, "start request")
-					fakeFirehose.SendEvent(events.Envelope_HttpStop, "stop request")
 					fakeFirehose.SendEvent(events.Envelope_HttpStartStop, "startstop request")
 					fakeFirehose.Start()
 				})
@@ -89,8 +87,8 @@ var _ = Describe("Firehose", func() {
 						BeforeEach(func() {
 							options.NoFilter = false
 						})
-						It("does not show log messages when user wants to see HttpStart", func() {
-							stdin.Write([]byte{'2', '\n'})
+						It("does not show log messages when user wants to see ValueMetric", func() {
+							stdin.Write([]byte{'6', '\n'})
 							client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 							client.Start()
 							Expect(stdout).ToNot(ContainSubstring("This is a very special test message"))
@@ -110,8 +108,6 @@ var _ = Describe("Firehose", func() {
 							Expect(stdout).To(ContainSubstring("eventType:CounterEvent"))
 							Expect(stdout).To(ContainSubstring("eventType:ContainerMetric"))
 							Expect(stdout).To(ContainSubstring("eventType:Error"))
-							Expect(stdout).To(ContainSubstring("eventType:HttpStart"))
-							Expect(stdout).To(ContainSubstring("eventType:HttpStop"))
 							Expect(stdout).To(ContainSubstring("eventType:HttpStartStop"))
 						})
 						It("shows error message when the user enters an invalid filter", func() {
@@ -176,22 +172,6 @@ var _ = Describe("Firehose", func() {
 						Expect(stdout).To(ContainSubstring("error:<source:\"source\" code:404 message:\"this is an error\""))
 					})
 
-					It("filters by HttpStart", func() {
-						options.Filter = "HttpStart"
-						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
-						client.Start()
-						Expect(stdout).To(ContainSubstring("httpStart:<timestamp:12 "))
-						Expect(stdout).To(ContainSubstring("userAgent:\"start request\""))
-					})
-
-					It("filters by HttpStop", func() {
-						options.Filter = "HttpStop"
-						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
-						client.Start()
-						Expect(stdout).To(ContainSubstring("httpStop:<timestamp:12 "))
-						Expect(stdout).To(ContainSubstring("uri:\"http://stop.example.com\""))
-					})
-
 					It("filters by HttpStartStop", func() {
 						options.Filter = "HttpStartStop"
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
@@ -205,7 +185,7 @@ var _ = Describe("Firehose", func() {
 						options.NoFilter = true
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
-						Expect(strings.Count(stdout.String(), "eventType:")).To(Equal(8))
+						Expect(strings.Count(stdout.String(), "eventType:")).To(Equal(6))
 					})
 				})
 			})
@@ -231,8 +211,6 @@ var _ = Describe("Firehose", func() {
 					fakeFirehose.SendEvent(events.Envelope_CounterEvent, "counterevent")
 					fakeFirehose.SendEvent(events.Envelope_ContainerMetric, "containermetric")
 					fakeFirehose.SendEvent(events.Envelope_Error, "this is an error")
-					fakeFirehose.SendEvent(events.Envelope_HttpStart, "start request")
-					fakeFirehose.SendEvent(events.Envelope_HttpStop, "stop request")
 					fakeFirehose.SendEvent(events.Envelope_HttpStartStop, "startstop request")
 					fakeFirehose.Start()
 				})
@@ -262,8 +240,8 @@ var _ = Describe("Firehose", func() {
 						BeforeEach(func() {
 							options = &firehose.ClientOptions{Debug: false, NoFilter: false}
 						})
-						It("does not show log messages when user wants to see HttpStart", func() {
-							stdin.Write([]byte{'2', '\n'})
+						It("does not show log messages when user wants to see ValueMetric", func() {
+							stdin.Write([]byte{'6', '\n'})
 							client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 							client.Start()
 							Expect(stdout).ToNot(ContainSubstring("This is a very special test message"))
@@ -283,8 +261,6 @@ var _ = Describe("Firehose", func() {
 							Expect(stdout).To(ContainSubstring("eventType:CounterEvent"))
 							Expect(stdout).To(ContainSubstring("eventType:ContainerMetric"))
 							Expect(stdout).To(ContainSubstring("eventType:Error"))
-							Expect(stdout).To(ContainSubstring("eventType:HttpStart"))
-							Expect(stdout).To(ContainSubstring("eventType:HttpStop"))
 							Expect(stdout).To(ContainSubstring("eventType:HttpStartStop"))
 						})
 						It("shows error message when the user enters an invalid filter", func() {
@@ -348,22 +324,6 @@ var _ = Describe("Firehose", func() {
 						Expect(stdout).To(ContainSubstring("error:<source:\"source\" code:404 message:\"this is an error\""))
 					})
 
-					It("filters by HttpStart", func() {
-						options = &firehose.ClientOptions{Filter: "HttpStart"}
-						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
-						client.Start()
-						Expect(stdout).To(ContainSubstring("httpStart:<timestamp:12 "))
-						Expect(stdout).To(ContainSubstring("userAgent:\"start request\""))
-					})
-
-					It("filters by HttpStop", func() {
-						options = &firehose.ClientOptions{Filter: "HttpStop"}
-						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
-						client.Start()
-						Expect(stdout).To(ContainSubstring("httpStop:<timestamp:12 "))
-						Expect(stdout).To(ContainSubstring("uri:\"http://stop.example.com\""))
-					})
-
 					It("filters by HttpStartStop", func() {
 						options = &firehose.ClientOptions{Filter: "HttpStartStop"}
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
@@ -377,7 +337,7 @@ var _ = Describe("Firehose", func() {
 						options = &firehose.ClientOptions{NoFilter: true}
 						client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 						client.Start()
-						Expect(strings.Count(stdout.String(), "eventType:")).To(Equal(8))
+						Expect(strings.Count(stdout.String(), "eventType:")).To(Equal(6))
 					})
 
 					It("uses specified subscription id", func() {

@@ -4,9 +4,9 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/cloudfoundry/cli/plugin/models"
-	"github.com/cloudfoundry/cli/plugin/pluginfakes"
-	io_helpers "github.com/cloudfoundry/cli/testhelpers/io"
+	"code.cloudfoundry.org/cli/plugin/models"
+	"code.cloudfoundry.org/cli/plugin/pluginfakes"
+	io_helpers "code.cloudfoundry.org/cli/testhelpers/io"
 	. "github.com/cloudfoundry/firehose-plugin"
 	"github.com/cloudfoundry/firehose-plugin/testhelpers"
 
