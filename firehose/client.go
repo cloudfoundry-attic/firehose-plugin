@@ -9,6 +9,7 @@ import (
 
 	"code.cloudfoundry.org/cli/cf/terminal"
 	"github.com/cloudfoundry/noaa/consumer"
+	noaaerrors "github.com/cloudfoundry/noaa/errors"
 	"github.com/cloudfoundry/sonde-go/events"
 )
 
@@ -75,7 +76,7 @@ func (c *Client) Start() {
 			subscriptionID = generateSubscriptionID()
 		}
 		c.ui.Say("Starting the nozzle")
-		output, errors = dopplerConnection.FirehoseWithoutReconnect(subscriptionID, c.authToken)
+		output, errors = dopplerConnection.Firehose(subscriptionID, c.authToken)
 	}
 
 	done := make(chan struct{})
@@ -83,6 +84,9 @@ func (c *Client) Start() {
 		defer close(done)
 		for err := range errors {
 			c.ui.Warn(err.Error())
+			if _, ok := err.(noaaerrors.RetryError); ok {
+				continue
+			}
 			return
 		}
 	}()
