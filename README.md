@@ -72,17 +72,9 @@ cf app-nozzle APP_NAME --no-filter
 cf nozzle --filter LogMessage
 cf app-nozzle APP_NAME --filter LogMessage
 
-# For HttpStart
-cf nozzle --filter HttpStart
-cf app-nozzle APP_NAME --filter HttpStart
-
 # For HttpStartStop
 cf nozzle --filter HttpStartStop
 cf app-nozzle APP_NAME --filter HttpStartStop
-
-# For HttpStop
-cf nozzle --filter HttpStop
-cf app-nozzle APP_NAME --filter HttpStop
 
 # For ValueMetric
 cf nozzle --filter ValueMetric
