@@ -102,8 +102,6 @@ func (c *Client) promptFilterType() (string, error) {
 
 	filter := c.ui.Ask(`Please enter one of the following choices:
 	  hit 'enter' for all messages
-	  2 for HttpStart
-	  3 for HttpStop
 	  4 for HttpStartStop
 	  5 for LogMessage
 	  6 for ValueMetric
@@ -118,7 +116,7 @@ func (c *Client) promptFilterType() (string, error) {
 
 	filterInt, err := strconv.Atoi(filter)
 	if err != nil {
-		return "", fmt.Errorf("Invalid filter choice %s. Enter an index from 2-9", filter)
+		return "", fmt.Errorf("Invalid filter choice %s. Enter an index from 4-9", filter)
 	}
 
 	_, ok := events.Envelope_EventType_name[int32(filterInt)]

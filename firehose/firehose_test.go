@@ -115,7 +115,7 @@ var _ = Describe("Firehose", func() {
 							client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 							client.Start()
 
-							Expect(stdout).To(ContainSubstring("Invalid filter choice bla. Enter an index from 2-9"))
+							Expect(stdout).To(ContainSubstring("Invalid filter choice bla. Enter an index from 4-9"))
 						})
 						It("shows error message when the user selects invalid filter index", func() {
 							stdin.Write([]byte{'1', '\n'})
@@ -268,7 +268,7 @@ var _ = Describe("Firehose", func() {
 							client := firehose.NewClient("ACCESS_TOKEN", fakeFirehose.URL(), options, ui)
 							client.Start()
 
-							Expect(stdout).To(ContainSubstring("Invalid filter choice bla. Enter an index from 2-9"))
+							Expect(stdout).To(ContainSubstring("Invalid filter choice bla. Enter an index from 4-9"))
 						})
 						It("shows error message when the user selects invalid filter index", func() {
 							stdin.Write([]byte{'1', '\n'})
