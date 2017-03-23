@@ -1,6 +1,12 @@
 # nozzle-plugin
 
-[![Build Status](https://travis-ci.org/cloudfoundry/firehose-plugin.svg?branch=master)](https://travis-ci.org/cloudfoundry/firehose-plugin)
+
+## **DEPRECATION NOTICE**
+
+This repository is no longer being supported.
+
+The Firehose Plugin repository is located in the [Cloud Foundry Community
+page](https://github.com/cloudfoundry-community/firehose-plugin).
 
 ## Installation
 
